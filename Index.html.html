@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinTrack Pro — Plateforme Financière 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --nav:#0F172A;--nav-hover:#1E293B;--bg:#F1F5F9;--surface:#FFFFFF;--border:#E2E8F0;
+  --text:#1E293B;--muted:#64748B;
+  --blue:#2563EB;--green:#10B981;--orange:#F59E0B;--red:#EF4444;--purple:#8B5CF6;--teal:#0891B2;
+  --shadow:0 1px 3px rgba(0,0,0,.08);
+  font-family:'Segoe UI',system-ui,sans-serif;
+}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+
+/* AUTH */
+#auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#0F172A,#1E3A5F);display:flex;align-items:center;justify-content:center;z-index:1000}
+.auth-box{background:#fff;border-radius:16px;padding:40px;width:390px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.auth-logo{text-align:center;margin-bottom:28px}
+.auth-logo .logo-icon{width:56px;height:56px;background:var(--blue);border-radius:14px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:10px}
+.auth-logo .logo-icon i{color:#fff;font-size:26px}
+.auth-logo h1{font-size:22px;font-weight:700}
+.auth-logo p{font-size:13px;color:var(--muted);margin-top:3px}
+.auth-field{margin-bottom:14px}
+.auth-field label{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:5px}
+.auth-field input,.auth-field select{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;color:var(--text)}
+.auth-field input:focus,.auth-field select:focus{outline:none;border-color:var(--blue)}
+.auth-btn{width:100%;padding:12px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-top:6px}
+.auth-btn:hover{opacity:.9}
+.auth-users{margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}
+.auth-users p{font-size:12px;color:var(--muted);margin-bottom:8px}
+.auth-quick{display:flex;gap:8px;flex-wrap:wrap}
+.auth-quick button{font-size:11px;padding:5px 10px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer;color:var(--muted)}
+.auth-quick button:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* LAYOUT */
+#app{display:none;height:100vh;flex-direction:row}
+.sidebar{width:245px;background:var(--nav);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sidebar-logo{padding:18px 16px 12px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sidebar-logo .icon{width:36px;height:36px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.sidebar-logo .icon i{color:#fff;font-size:18px}
+.sidebar-logo h2{color:#fff;font-size:16px;font-weight:700}
+.sidebar-logo span{color:rgba(255,255,255,.35);font-size:11px}
+.sidebar-nav{padding:10px 8px;flex:1}
+.nav-section{margin-bottom:18px}
+.nav-section-title{font-size:10px;font-weight:600;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:.8px;padding:0 8px;margin-bottom:5px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:all .2s;margin-bottom:2px;color:rgba(255,255,255,.58);font-size:13.5px}
+.nav-item:hover{background:var(--nav-hover);color:rgba(255,255,255,.9)}
+.nav-item.active{background:var(--blue);color:#fff}
+.nav-item i{width:18px;font-size:16px;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px}
+.sidebar-user{padding:12px 16px;border-top:1px solid rgba(255,255,255,.08)}
+.sidebar-user-info{display:flex;align-items:center;gap:10px}
+.user-avatar{width:34px;height:34px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;flex-shrink:0}
+.user-name{font-size:13px;font-weight:500;color:#fff}
+.user-role{font-size:11px;color:rgba(255,255,255,.38)}
+.logout-btn{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.38);cursor:pointer;padding:4px;border-radius:4px}
+.logout-btn:hover{color:#fff}
+
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;gap:16px;flex-shrink:0}
+.topbar-title{font-size:17px;font-weight:600}
+.topbar-actions{margin-left:auto;display:flex;align-items:center;gap:10px}
+.btn-icon{width:34px;height:34px;border:1px solid var(--border);border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted)}
+.btn-icon:hover{background:var(--bg)}
+.alert-banner{background:#FFFBEB;border-bottom:1px solid #FDE68A;padding:8px 24px;display:flex;align-items:center;gap:10px;font-size:13px;color:#92400E;flex-shrink:0}
+.alert-close{margin-left:auto;background:none;border:none;cursor:pointer;color:#92400E;opacity:.6}
+.page-content{flex:1;overflow-y:auto;padding:24px}
+
+/* COMPONENTS */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.kpi-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.kpi-card{background:var(--surface);border-radius:12px;padding:18px 20px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.kpi-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.kpi-label{font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.4px}
+.kpi-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.kpi-value{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-bottom:4px}
+.kpi-change{font-size:12px;display:flex;align-items:center;gap:4px;color:var(--muted)}
+.kpi-change.up{color:var(--green)}.kpi-change.down{color:var(--red)}
+
+.charts-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px}
+.charts-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.chart-card{background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.chart-card h3{font-size:14px;font-weight:600;margin-bottom:4px}
+.chart-card p{font-size:12px;color:var(--muted);margin-bottom:14px}
+
+.alerts-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.alert-card{background:var(--surface);border-radius:12px;padding:16px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.alert-card-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.alert-dot{width:8px;height:8px;border-radius:50%}
+.alert-card h4{font-size:13px;font-weight:600}
+.alert-list{display:flex;flex-direction:column;gap:8px}
+.alert-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;font-size:12px}
+.alert-item-name{font-weight:500}
+.alert-item-info{color:var(--muted)}
+.alert-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;white-space:nowrap}
+
+.table-card{background:var(--surface);border-radius:12px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+.table-header{padding:14px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.table-header h3{font-size:14px;font-weight:600}
+.table-actions{margin-left:auto;display:flex;gap:8px}
+.filters-row{padding:10px 20px;border-bottom:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;background:var(--bg)}
+.filter-input{padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:#fff;min-width:130px}
+.filter-input:focus{outline:none;border-color:var(--blue)}
+.btn-sm{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;border:none}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{opacity:.9}
+.btn-outline{background:#fff;color:var(--text);border:1px solid var(--border)!important}.btn-outline:hover{background:var(--bg)}
+.btn-green{background:#ECFDF5;color:#065F46}
+.btn-red{background:#FEF2F2;color:#991B1B}
+.btn-teal{background:#ECFEFF;color:#155E75}
+table{width:100%;border-collapse:collapse}
+thead th{padding:10px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);background:var(--bg)}
+tbody tr{border-bottom:1px solid var(--border);transition:.15s}
+tbody tr:hover{background:#F8FAFC}
+tbody tr:last-child{border-bottom:none}
+tbody td{padding:11px 16px;font-size:13px}
+.status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600}
+.status-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+.badge-green{background:#ECFDF5;color:#065F46}
+.badge-red{background:#FEF2F2;color:#991B1B}
+.badge-orange{background:#FFFBEB;color:#92400E}
+.badge-blue{background:#EFF6FF;color:#1D4ED8}
+.badge-gray{background:#F1F5F9;color:#475569}
+.badge-purple{background:#F5F3FF;color:#6D28D9}
+.badge-teal{background:#ECFEFF;color:#155E75}
+
+/* BANK CARDS */
+.bank-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.bank-card{background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.bank-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.bank-avatar{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
+.bank-name{font-size:15px;font-weight:600}
+.bank-total{font-size:12px;color:var(--muted)}
+.bank-product{margin-bottom:11px}
+.bank-product-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.bank-product-name{font-size:12px;font-weight:500}
+.bank-product-amounts{font-size:11px;color:var(--muted)}
+.progress-bar{height:7px;background:#E2E8F0;border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;border-radius:4px}
+.prog-green{background:var(--green)}.prog-orange{background:var(--orange)}.prog-red{background:var(--red)}
+.bank-summary{display:flex;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.bank-stat{flex:1;text-align:center}
+.bank-stat-val{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.bank-stat-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* MODAL */
+.form-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center}
+.form-modal-overlay.show{display:flex}
+.form-modal{background:#fff;border-radius:14px;width:600px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.form-modal-header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1}
+.form-modal-header h3{font-size:16px;font-weight:600}
+.form-modal-body{padding:22px 24px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px}
+.form-row.full{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:12px;font-weight:500;color:var(--muted)}
+.form-group input,.form-group select,.form-group textarea{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:#fff;font-family:inherit;transition:.2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--blue)}
+.form-group textarea{min-height:65px;resize:vertical}
+.form-actions{display:flex;justify-content:flex-end;gap:10px;padding:14px 24px;border-top:1px solid var(--border)}
+.form-section-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;margin-top:4px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+.page{display:none}.page.active{display:block}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.section-header-left h2{font-size:18px;font-weight:700}
+.section-header-left p{font-size:13px;color:var(--muted);margin-top:2px}
+.monthly-total-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.monthly-stat{background:var(--surface);border-radius:10px;padding:14px 16px;border:1px solid var(--border)}
+.monthly-stat .val{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.monthly-stat .lbl{font-size:11px;color:var(--muted);margin-top:2px}
+
+#toast{position:fixed;bottom:24px;right:24px;background:#1E293B;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;display:none;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:320px}
+
+@media(max-width:1024px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.charts-grid,.charts-grid-2{grid-template-columns:1fr}.bank-grid{grid-template-columns:1fr}.alerts-row{grid-template-columns:1fr}}
+@media(max-width:768px){.sidebar{width:56px}.sidebar-logo h2,.sidebar-logo span,.nav-section-title,.nav-item span,.user-name,.user-role,.nav-badge{display:none}.nav-item{justify-content:center}}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="logo-icon"><i class="fas fa-chart-line"></i></div>
+      <h1>FinTrack Pro</h1>
+      <p>Plateforme Financière Industrielle — 2026</p>
+    </div>
+
+    <!-- Message erreur -->
+    <div id="auth-error" style="display:none;background:#FEF2F2;color:#991B1B;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;border:1px solid #FECACA">
+      <i class="fas fa-exclamation-circle"></i> <span id="auth-error-msg">Mot de passe incorrect</span>
+    </div>
+
+    <div class="auth-field"><label>Nom / Identifiant</label><input type="text" id="login-name" placeholder="Votre nom"></div>
+    <div class="auth-field"><label>Mot de passe <span style="color:#94A3B8;font-weight:400">(laisser vide pour accès consultation)</span></label>
+      <input type="password" id="login-pass" placeholder="Mot de passe administrateur (optionnel)">
+    </div>
+    <button class="auth-btn" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> &nbsp;Connexion</button>
+
+    <div style="margin-top:18px;padding:14px;background:#F8FAFC;border-radius:10px;border:1px solid var(--border)">
+      <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">Modes d'accès</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+          <div style="width:28px;height:28px;background:#FEF2F2;border-radius:6px;display:flex;align-items:center;justify-content:center"><i class="fas fa-edit" style="color:var(--red);font-size:12px"></i></div>
+          <div><b>Administrateur</b> — Accès complet + modification <span style="color:var(--muted)">(mot de passe requis)</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+          <div style="width:28px;height:28px;background:#EFF6FF;border-radius:6px;display:flex;align-items:center;justify-content:center"><i class="fas fa-eye" style="color:var(--blue);font-size:12px"></i></div>
+          <div><b>Consultation</b> — Voir les données uniquement <span style="color:var(--muted)">(sans mot de passe)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ALERT BANNER -->
+<div class="alert-banner" id="main-alert" style="display:none">
+  <i class="fas fa-exclamation-triangle" style="color:var(--orange)"></i>
+  <span>3 échéances dans les 7 prochains jours &nbsp;·&nbsp; 2 lignes bancaires dépassent 80% d'utilisation</span>
+  <button class="alert-close" onclick="this.parentElement.style.display='none'"><i class="fas fa-times"></i></button>
+</div>
+
+<!-- MODAL -->
+<div class="form-modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="form-modal">
+    <div class="form-modal-header">
+      <h3 id="modal-title">Ajouter</h3>
+      <button class="btn-icon" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="form-modal-body" id="modal-body"></div>
+    <div class="form-actions">
+      <button class="btn-sm btn-outline" onclick="closeModal()">Annuler</button>
+      <button class="btn-sm btn-primary" onclick="saveModal()"><i class="fas fa-save"></i> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="icon"><i class="fas fa-chart-line"></i></div>
+      <div><h2>FinTrack</h2><span>Pro · 2026</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">Principal</div>
+        <div class="nav-item active" onclick="showPage('dashboard',this)"><i class="fas fa-tachometer-alt"></i><span>Tableau de bord</span></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Modules</div>
+        <div class="nav-item" onclick="showPage('impayes-clients',this)"><i class="fas fa-file-invoice-dollar"></i><span>Impayés Clients</span><span class="nav-badge" id="badge-clients">5</span></div>
+        <div class="nav-item" onclick="showPage('impayes-fourn',this)"><i class="fas fa-file-invoice"></i><span>Impayés Fournisseurs</span><span class="nav-badge" id="badge-fourn">3</span></div>
+        <div class="nav-item" onclick="showPage('devises',this)"><i class="fas fa-coins"></i><span>Engagements Devise</span></div>
+        <div class="nav-item" onclick="showPage('mensuels',this)"><i class="fas fa-calendar-alt"></i><span>Engagements Mensuels</span></div>
+        <div class="nav-item" onclick="showPage('lignes',this)"><i class="fas fa-university"></i><span>Lignes Bancaires</span></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Rapports</div>
+        <div class="nav-item" onclick="showPage('rapports',this)"><i class="fas fa-file-chart-pie"></i><span>Rapports</span></div>
+        <div class="nav-item" id="nav-admin" onclick="showPage('admin',this)"><i class="fas fa-cog"></i><span>Administration</span></div>
+      </div>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-user-info">
+        <div class="user-avatar" id="user-avatar">AD</div>
+        <div><div class="user-name" id="user-name">Admin</div><div class="user-role" id="user-role-disp">Administrateur</div></div>
+        <button class="logout-btn" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="page-title">Tableau de bord</div>
+      <div class="topbar-actions">
+        <select class="filter-input" style="min-width:auto;width:90px" id="filter-year">
+          <option>2025</option><option selected>2026</option>
+        </select>
+        <button class="btn-icon" title="Actualiser" onclick="showNotif('Données actualisées ✓')"><i class="fas fa-sync-alt"></i></button>
+        <button class="btn-icon" title="Exporter sauvegarde JSON" onclick="exportJSON()" style="color:var(--green)"><i class="fas fa-download"></i></button>
+        <button class="btn-icon" title="Importer sauvegarde JSON" onclick="importJSON()" style="color:var(--blue)"><i class="fas fa-upload"></i></button>
+        <button class="btn-icon" title="Réinitialiser données" onclick="resetData()" style="color:var(--red)"><i class="fas fa-trash-restore"></i></button>
+        <div id="save-indicator" style="display:flex;align-items:center;gap:5px;font-size:12px;opacity:0;transition:opacity .4s;white-space:nowrap">
+          <i id="save-icon" class="fas fa-check-circle"></i>
+          <span id="save-text">Sauvegardé</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- ==================== DASHBOARD ==================== -->
+      <div class="page active" id="page-dashboard">
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-header"><span class="kpi-label">Impayés Clients</span><div class="kpi-icon" style="background:#FEF2F2"><i class="fas fa-file-invoice" style="color:var(--red)"></i></div></div>
+            <div class="kpi-value" style="color:var(--red)" id="db-kpi-clients">–</div>
+            <div class="kpi-change down" id="db-kpi-clients-sub">–</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-header"><span class="kpi-label">Impayés Fournisseurs</span><div class="kpi-icon" style="background:#ECFEFF"><i class="fas fa-file-invoice" style="color:var(--teal)"></i></div></div>
+            <div class="kpi-value" style="color:var(--teal)" id="db-kpi-fourn">–</div>
+            <div class="kpi-change down" id="db-kpi-fourn-sub">–</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-header"><span class="kpi-label">Engagements Devise</span><div class="kpi-icon" style="background:#F5F3FF"><i class="fas fa-coins" style="color:var(--purple)"></i></div></div>
+            <div class="kpi-value" style="color:var(--purple)" id="db-kpi-devises">–</div>
+            <div class="kpi-change" style="color:var(--muted)" id="db-kpi-devises-sub">–</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-header"><span class="kpi-label">Utilisation Lignes</span><div class="kpi-icon" style="background:#FFFBEB"><i class="fas fa-university" style="color:var(--orange)"></i></div></div>
+            <div class="kpi-value" style="color:var(--orange)" id="db-kpi-lignes">–</div>
+            <div class="kpi-change down" id="db-kpi-lignes-sub">–</div>
+          </div>
+        </div>
+        <div class="alerts-row">
+          <div class="alert-card">
+            <div class="alert-card-header"><div class="alert-dot" style="background:var(--red)"></div><h4>Échéances &lt; 7 jours</h4></div>
+            <div class="alert-list" id="db-alert-7"></div>
+          </div>
+          <div class="alert-card">
+            <div class="alert-card-header"><div class="alert-dot" style="background:var(--orange)"></div><h4>Échéances 7–15 jours</h4></div>
+            <div class="alert-list" id="db-alert-15"></div>
+          </div>
+          <div class="alert-card">
+            <div class="alert-card-header"><div class="alert-dot" style="background:var(--blue)"></div><h4>Lignes dépassant 80%</h4></div>
+            <div class="alert-list" id="db-alert-lignes"></div>
+          </div>
+        </div>
+        <div class="charts-grid">
+          <div class="chart-card"><h3>Évolution des impayés (clients & fournisseurs)</h3><p>Encours mensuel 2026 en TND</p><div style="position:relative;height:220px"><canvas id="chart-impayes"></canvas></div></div>
+          <div class="chart-card"><h3>Utilisation lignes bancaires</h3><p>Répartition par banque</p><div style="position:relative;height:220px"><canvas id="chart-banques-pie"></canvas></div></div>
+        </div>
+        <div class="charts-grid">
+          <div class="chart-card"><h3>Engagements en devise par mois</h3><p>EUR et USD convertis en TND — 2026</p><div style="position:relative;height:200px"><canvas id="chart-devises"></canvas></div></div>
+          <div class="chart-card"><h3>Règlements par banque</h3><p>Engagements mensuels (KTND)</p><div style="position:relative;height:200px"><canvas id="chart-banks-bar"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- ==================== IMPAYES CLIENTS ==================== -->
+      <div class="page" id="page-impayes-clients">
+        <div class="section-header">
+          <div class="section-header-left"><h2>Impayés Clients</h2><p>Suivi des règlements clients en attente et en retard — 2026</p></div>
+          <button class="btn-sm btn-primary" onclick="openModal('impaye-client')"><i class="fas fa-plus"></i> Nouvel impayé</button>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><h3>Liste des impayés clients</h3>
+            <div class="table-actions">
+              <button class="btn-sm btn-green" onclick="showNotif('Export Excel — Impayés Clients ✓')"><i class="fas fa-file-excel"></i> Excel</button>
+              <button class="btn-sm btn-red" onclick="showNotif('Export PDF — Impayés Clients ✓')"><i class="fas fa-file-pdf"></i> PDF</button>
+            </div>
+          </div>
+          <div class="filters-row">
+            <input class="filter-input" placeholder="🔍 Rechercher client..." id="fc-client" oninput="filterImpayesClients()">
+            <select class="filter-input" id="fc-mode" onchange="filterImpayesClients()"><option value="">Tous modes</option><option>Chèque</option><option>Traite</option><option>Virement</option><option>Effet</option></select>
+            <select class="filter-input" id="fc-statut" onchange="filterImpayesClients()"><option value="">Tous statuts</option><option>À échoir</option><option>Échu</option><option>En retard</option><option>Régularisé</option></select>
+            <select class="filter-input" id="fc-banque" onchange="filterImpayesClients()"><option value="">Toutes banques</option></select>
+            <input class="filter-input" type="month" id="fc-mois" onchange="filterImpayesClients()" style="width:140px">
+          </div>
+          <div style="overflow-x:auto">
+            <table><thead><tr><th>Client</th><th>Réf.</th><th>Mode</th><th>N° Règlement</th><th>Émission</th><th>Échéance</th><th>Montant TND</th><th>Banque</th><th>Retard</th><th>Statut</th><th>Actions</th></tr></thead>
+            <tbody id="impayes-clients-body"></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== IMPAYES FOURNISSEURS ==================== -->
+      <div class="page" id="page-impayes-fourn">
+        <div class="section-header">
+          <div class="section-header-left"><h2>Impayés Fournisseurs</h2><p>Suivi des règlements fournisseurs en attente et en retard — 2026</p></div>
+          <button class="btn-sm btn-primary" onclick="openModal('impaye-fourn')"><i class="fas fa-plus"></i> Nouvel impayé</button>
+        </div>
+        <div class="kpi-grid-3" id="kpi-fourn-row">
+          <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Total impayés</span><div class="kpi-icon" style="background:#ECFEFF"><i class="fas fa-file-invoice" style="color:var(--teal)"></i></div></div><div class="kpi-value" id="kpi-fourn-total">–</div><div class="kpi-change" style="color:var(--muted)">Tous statuts actifs</div></div>
+          <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">En retard</span><div class="kpi-icon" style="background:#FEF2F2"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i></div></div><div class="kpi-value" id="kpi-fourn-retard">–</div><div class="kpi-change down">Nécessitent action</div></div>
+          <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">À échoir 30j</span><div class="kpi-icon" style="background:#FFFBEB"><i class="fas fa-clock" style="color:var(--orange)"></i></div></div><div class="kpi-value" id="kpi-fourn-aechoir">–</div><div class="kpi-change down">Échéances proches</div></div>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><h3>Liste des impayés fournisseurs</h3>
+            <div class="table-actions">
+              <button class="btn-sm btn-green" onclick="showNotif('Export Excel — Impayés Fournisseurs ✓')"><i class="fas fa-file-excel"></i> Excel</button>
+              <button class="btn-sm btn-red" onclick="showNotif('Export PDF — Impayés Fournisseurs ✓')"><i class="fas fa-file-pdf"></i> PDF</button>
+            </div>
+          </div>
+          <div class="filters-row">
+            <input class="filter-input" placeholder="🔍 Rechercher fournisseur..." id="ff-fourn" oninput="filterImpayesFourn()">
+            <select class="filter-input" id="ff-mode" onchange="filterImpayesFourn()"><option value="">Tous modes</option><option>Chèque</option><option>Traite</option><option>Virement</option><option>Effet</option></select>
+            <select class="filter-input" id="ff-statut" onchange="filterImpayesFourn()"><option value="">Tous statuts</option><option>À échoir</option><option>Échu</option><option>En retard</option><option>Régularisé</option></select>
+            <select class="filter-input" id="ff-banque" onchange="filterImpayesFourn()"><option value="">Toutes banques</option></select>
+            <input class="filter-input" type="month" id="ff-mois" onchange="filterImpayesFourn()" style="width:140px">
+          </div>
+          <div style="overflow-x:auto">
+            <table><thead><tr><th>Fournisseur</th><th>Réf.</th><th>Mode</th><th>N° Règlement</th><th>Émission</th><th>Échéance</th><th>Montant TND</th><th>Banque</th><th>Retard</th><th>Statut</th><th>Actions</th></tr></thead>
+            <tbody id="impayes-fourn-body"></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== DEVISES ==================== -->
+      <div class="page" id="page-devises">
+        <div class="section-header">
+          <div class="section-header-left"><h2>Engagements en Devise</h2><p>Financement fournisseurs EUR / USD — 2026</p></div>
+          <button class="btn-sm btn-primary" onclick="openModal('devise')"><i class="fas fa-plus"></i> Nouvel engagement</button>
+        </div>
+        <div class="kpi-grid-3">
+          <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Total EUR</span><div class="kpi-icon" style="background:#F5F3FF"><span style="font-size:18px;color:var(--purple);font-weight:700">€</span></div></div><div class="kpi-value" id="kpi-eur">–</div><div class="kpi-change" style="color:var(--muted)">Taux moyen: 3.35 TND</div></div>
+          <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Total USD</span><div class="kpi-icon" style="background:#ECFDF5"><span style="font-size:18px;color:var(--green);font-weight:700">$</span></div></div><div class="kpi-value" id="kpi-usd">–</div><div class="kpi-change" style="color:var(--muted)">Taux moyen: 3.08 TND</div></div>
+          <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Total TND</span><div class="kpi-icon" style="background:#EFF6FF"><i class="fas fa-wallet" style="color:var(--blue)"></i></div></div><div class="kpi-value" id="kpi-tnd-total">–</div><div class="kpi-change" style="color:var(--muted)">Engagements actifs</div></div>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><h3>Engagements fournisseurs en devise</h3>
+            <div class="table-actions">
+              <button class="btn-sm btn-green" onclick="showNotif('Export Excel ✓')"><i class="fas fa-file-excel"></i> Excel</button>
+              <button class="btn-sm btn-red" onclick="showNotif('Export PDF ✓')"><i class="fas fa-file-pdf"></i> PDF</button>
+            </div>
+          </div>
+          <div class="filters-row">
+            <input class="filter-input" placeholder="🔍 Fournisseur..." id="f-fourn-d" oninput="filterDevises()">
+            <select class="filter-input" id="f-devise" onchange="filterDevises()"><option value="">Toutes devises</option><option>EUR</option><option>USD</option></select>
+            <select class="filter-input" id="f-statut-d" onchange="filterDevises()"><option value="">Tous statuts</option><option>En cours</option><option>Soldé</option><option>Partiellement réglé</option></select>
+            <select class="filter-input" id="f-banque-d" onchange="filterDevises()"><option value="">Toutes banques</option></select>
+          </div>
+          <div style="overflow-x:auto">
+            <table><thead><tr><th>Fournisseur</th><th>Date</th><th>Devise</th><th>Montant Devise</th><th>Taux</th><th>Montant TND</th><th>Banque</th><th>N° Dossier</th><th>Statut</th><th>Actions</th></tr></thead>
+            <tbody id="devises-body"></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== MENSUELS ==================== -->
+      <div class="page" id="page-mensuels">
+        <div class="section-header">
+          <div class="section-header-left"><h2>Engagements Mensuels par Banque</h2><p>Règlements fournisseurs mensuels — 2026</p></div>
+          <button class="btn-sm btn-primary" onclick="openModal('mensuel')"><i class="fas fa-plus"></i> Ajouter règlement</button>
+        </div>
+        <div class="monthly-total-row" id="monthly-totals"></div>
+        <div class="charts-grid-2">
+          <div class="chart-card"><h3>Histogramme mensuel 2026</h3><p>Règlements par mois (TND)</p><div style="position:relative;height:220px"><canvas id="chart-monthly-bar"></canvas></div></div>
+          <div class="chart-card"><h3>Classement par banque</h3><p>Volume total des règlements</p><div style="position:relative;height:220px"><canvas id="chart-bank-rank"></canvas></div></div>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><h3>Détail des règlements</h3>
+            <div class="table-actions">
+              <button class="btn-sm btn-green" onclick="showNotif('Export Excel ✓')"><i class="fas fa-file-excel"></i> Excel</button>
+              <button class="btn-sm btn-red" onclick="showNotif('Export PDF ✓')"><i class="fas fa-file-pdf"></i> PDF</button>
+            </div>
+          </div>
+          <div class="filters-row">
+            <select class="filter-input" id="f-mois-m" onchange="filterMensuels()"><option value="">Tous les mois</option><option>Janvier</option><option>Février</option><option>Mars</option><option>Avril</option><option>Mai</option><option>Juin</option><option>Juillet</option><option>Août</option><option>Septembre</option><option>Octobre</option><option>Novembre</option><option>Décembre</option></select>
+            <select class="filter-input" id="f-banque-m" onchange="filterMensuels()"><option value="">Toutes banques</option></select>
+            <input class="filter-input" placeholder="Fournisseur..." id="f-fourn-m" oninput="filterMensuels()">
+          </div>
+          <div style="overflow-x:auto">
+            <table><thead><tr><th>Mois</th><th>Banque</th><th>Fournisseur</th><th>Mode</th><th>N° Règlement</th><th>Date</th><th>Devise</th><th>Montant TND</th><th>Actions</th></tr></thead>
+            <tbody id="mensuels-body"></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== LIGNES BANCAIRES ==================== -->
+      <div class="page" id="page-lignes">
+        <div class="section-header">
+          <div class="section-header-left"><h2>Lignes Bancaires</h2><p>Concours et disponibilités par établissement — 2026</p></div>
+          <button class="btn-sm btn-primary" onclick="openAddBankModal()"><i class="fas fa-plus"></i> Ajouter banque</button>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Total autorisé</span><div class="kpi-icon" style="background:#ECFDF5"><i class="fas fa-check" style="color:var(--green)"></i></div></div><div class="kpi-value" id="lignes-total-auth">–</div><div class="kpi-change" style="color:var(--muted)">Toutes banques</div></div>
+          <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Encours utilisé</span><div class="kpi-icon" style="background:#FEF2F2"><i class="fas fa-chart-pie" style="color:var(--red)"></i></div></div><div class="kpi-value" id="lignes-total-used">–</div><div class="kpi-change down" id="lignes-pct-used">–</div></div>
+          <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Disponible</span><div class="kpi-icon" style="background:#EFF6FF"><i class="fas fa-money-bill-wave" style="color:var(--blue)"></i></div></div><div class="kpi-value" id="lignes-total-dispo">–</div><div class="kpi-change up" id="lignes-pct-dispo">–</div></div>
+          <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Lignes en alerte</span><div class="kpi-icon" style="background:#FFFBEB"><i class="fas fa-exclamation-triangle" style="color:var(--orange)"></i></div></div><div class="kpi-value" id="lignes-alerte">–</div><div class="kpi-change down">Dépassent 80%</div></div>
+        </div>
+        <div class="bank-grid" id="bank-cards"></div>
+      </div>
+
+      <!-- ==================== RAPPORTS ==================== -->
+      <div class="page" id="page-rapports">
+        <div class="section-header"><div class="section-header-left"><h2>Rapports Financiers</h2><p>Génération automatique — 2026</p></div></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+          <div class="chart-card" style="text-align:center"><div style="font-size:36px;margin-bottom:10px">📊</div><h3 style="margin-bottom:6px">Rapport Impayés Clients</h3><p>État consolidé des impayés clients par période et banque</p><div style="display:flex;gap:8px;justify-content:center;margin-top:14px"><button class="btn-sm btn-green" onclick="showNotif('Export Excel ✓')"><i class="fas fa-file-excel"></i> Excel</button><button class="btn-sm btn-red" onclick="showNotif('Export PDF ✓')"><i class="fas fa-file-pdf"></i> PDF</button></div></div>
+          <div class="chart-card" style="text-align:center"><div style="font-size:36px;margin-bottom:10px">🧾</div><h3 style="margin-bottom:6px">Rapport Impayés Fournisseurs</h3><p>État des impayés fournisseurs avec statuts et retards</p><div style="display:flex;gap:8px;justify-content:center;margin-top:14px"><button class="btn-sm btn-green" onclick="showNotif('Export Excel ✓')"><i class="fas fa-file-excel"></i> Excel</button><button class="btn-sm btn-red" onclick="showNotif('Export PDF ✓')"><i class="fas fa-file-pdf"></i> PDF</button></div></div>
+          <div class="chart-card" style="text-align:center"><div style="font-size:36px;margin-bottom:10px">💱</div><h3 style="margin-bottom:6px">Rapport Devises</h3><p>Engagements fournisseurs EUR/USD avec conversion TND</p><div style="display:flex;gap:8px;justify-content:center;margin-top:14px"><button class="btn-sm btn-green" onclick="showNotif('Export Excel ✓')"><i class="fas fa-file-excel"></i> Excel</button><button class="btn-sm btn-red" onclick="showNotif('Export PDF ✓')"><i class="fas fa-file-pdf"></i> PDF</button></div></div>
+          <div class="chart-card" style="text-align:center"><div style="font-size:36px;margin-bottom:10px">🏦</div><h3 style="margin-bottom:6px">Rapport Bancaire</h3><p>Utilisation des lignes et disponibilités par banque</p><div style="display:flex;gap:8px;justify-content:center;margin-top:14px"><button class="btn-sm btn-green" onclick="showNotif('Export Excel ✓')"><i class="fas fa-file-excel"></i> Excel</button><button class="btn-sm btn-red" onclick="showNotif('Export PDF ✓')"><i class="fas fa-file-pdf"></i> PDF</button></div></div>
+          <div class="chart-card" style="text-align:center"><div style="font-size:36px;margin-bottom:10px">📋</div><h3 style="margin-bottom:6px">Rapport Direction</h3><p>Synthèse exécutive pour la Direction Générale et les banques</p><div style="display:flex;gap:8px;justify-content:center;margin-top:14px"><button class="btn-sm btn-red" onclick="showNotif('Export PDF Direction ✓')"><i class="fas fa-file-pdf"></i> PDF Direction</button></div></div>
+          <div class="chart-card" style="text-align:center"><div style="font-size:36px;margin-bottom:10px">⚠️</div><h3 style="margin-bottom:6px">Rapport Alertes</h3><p>Échéances imminentes et dépassements de plafonds bancaires</p><div style="display:flex;gap:8px;justify-content:center;margin-top:14px"><button class="btn-sm btn-red" onclick="showNotif('Export PDF Alertes ✓')"><i class="fas fa-file-pdf"></i> PDF Alertes</button></div></div>
+        </div>
+      </div>
+
+      <!-- ==================== ADMIN ==================== -->
+      <div class="page" id="page-admin">
+        <div class="section-header"><div class="section-header-left"><h2>Administration</h2><p>Gestion des utilisateurs et droits d'accès</p></div><button class="btn-sm btn-primary" onclick="openModal('user')"><i class="fas fa-user-plus"></i> Ajouter utilisateur</button></div>
+        <div class="table-card" style="margin-bottom:20px">
+          <div class="table-header"><h3>Utilisateurs du système</h3></div>
+          <table><thead><tr><th>Nom</th><th>Email</th><th>Profil</th><th>Dernier accès</th><th>Statut</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td><b>Ahmed Ben Ali</b></td><td>ahmed@fintrack.tn</td><td><span class="status-badge badge-red">Administrateur</span></td><td>Aujourd'hui 09:15</td><td><span class="status-badge badge-green">Actif</span></td><td><button class="btn-sm btn-outline" style="padding:4px 10px"><i class="fas fa-edit"></i></button></td></tr>
+            <tr><td><b>Sana Trabelsi</b></td><td>sana@fintrack.tn</td><td><span class="status-badge badge-blue">Dir. Financier</span></td><td>Hier 16:42</td><td><span class="status-badge badge-green">Actif</span></td><td><button class="btn-sm btn-outline" style="padding:4px 10px"><i class="fas fa-edit"></i></button></td></tr>
+            <tr><td><b>Mohamed Chaari</b></td><td>m.chaari@fintrack.tn</td><td><span class="status-badge badge-purple">Dir. Général</span></td><td>Il y a 3 jours</td><td><span class="status-badge badge-green">Actif</span></td><td><button class="btn-sm btn-outline" style="padding:4px 10px"><i class="fas fa-edit"></i></button></td></tr>
+          </tbody></table>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><h3>Journal d'audit</h3></div>
+          <table><thead><tr><th>Date/Heure</th><th>Utilisateur</th><th>Action</th><th>Module</th><th>Détails</th></tr></thead>
+          <tbody>
+            <tr><td>2026-06-18 09:15</td><td>Ahmed Ben Ali</td><td><span class="status-badge badge-blue">CONNEXION</span></td><td>Auth</td><td>IP: 192.168.1.10</td></tr>
+            <tr><td>2026-06-18 09:22</td><td>Ahmed Ben Ali</td><td><span class="status-badge badge-green">AJOUT</span></td><td>Impayés Clients</td><td>Nouvel impayé SOTUVER — 45 000 TND</td></tr>
+            <tr><td>2026-06-17 16:42</td><td>Sana Trabelsi</td><td><span class="status-badge badge-orange">MODIFICATION</span></td><td>Lignes bancaires</td><td>Plafond BIAT modifié → 3 500 KTND</td></tr>
+            <tr><td>2026-06-17 14:10</td><td>Sana Trabelsi</td><td><span class="status-badge badge-green">EXPORT</span></td><td>Rapports</td><td>Export PDF — Rapport Direction</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+
+    </div><!-- page-content -->
+  </div><!-- main -->
+</div><!-- app -->
+
+<div id="toast"></div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+let currentRole='admin', editId=null, editModule=null;
+let chartInstances={};
+
+let data={
+  impayesClients:[
+    {id:1,client:'SOTUVER SARL',ref:'CLI-001',mode:'Traite',num:'TR-2247',emission:'2026-04-01',echeance:'2026-05-31',montant:45000,banque:'BIAT',statut:'En retard',commentaire:'Relance envoyée'},
+    {id:2,client:'TUNISAIR',ref:'CLI-002',mode:'Chèque',num:'CH-8821',emission:'2026-04-15',echeance:'2026-06-02',montant:128500,banque:'STB',statut:'À échoir',commentaire:''},
+    {id:3,client:'COFAT',ref:'CLI-003',mode:'Virement',num:'VIR-5509',emission:'2026-03-10',echeance:'2026-06-10',montant:72000,banque:'BIAT',statut:'À échoir',commentaire:''},
+    {id:4,client:'BIAT Financement',ref:'CLI-004',mode:'Effet',num:'EF-1103',emission:'2026-04-20',echeance:'2026-06-12',montant:230000,banque:'BNA',statut:'À échoir',commentaire:''},
+    {id:5,client:'STEG',ref:'CLI-005',mode:'Chèque',num:'CH-3310',emission:'2026-02-01',echeance:'2026-04-15',montant:89000,banque:'ATB',statut:'Échu',commentaire:'En cours de régularisation'},
+    {id:6,client:'TUNISIE TELECOM',ref:'CLI-006',mode:'Traite',num:'TR-4421',emission:'2026-03-25',echeance:'2026-05-20',montant:156000,banque:'UIB',statut:'En retard',commentaire:'Litige commercial'},
+    {id:7,client:'GROUPE POULINA',ref:'CLI-007',mode:'Virement',num:'VIR-9901',emission:'2026-04-05',echeance:'2026-07-05',montant:340000,banque:'BIAT',statut:'À échoir',commentaire:''},
+    {id:8,client:'SFBT',ref:'CLI-008',mode:'Effet',num:'EF-0087',emission:'2026-01-15',echeance:'2026-04-01',montant:67000,banque:'STB',statut:'Régularisé',commentaire:'Réglé le 28/03'},
+  ],
+  impayesFourn:[
+    {id:1,fournisseur:'ABB SWITZERLAND',ref:'FRN-001',mode:'Effet',num:'EF-0041',emission:'2026-03-10',echeance:'2026-06-20',montant:185000,banque:'BNA',statut:'À échoir',commentaire:'Traite acceptée'},
+    {id:2,fournisseur:'SIEMENS AG',ref:'FRN-002',mode:'Virement',num:'VIR-1120',emission:'2026-04-01',echeance:'2026-05-25',montant:92000,banque:'BIAT',statut:'En retard',commentaire:'Paiement en attente validation DG'},
+    {id:3,fournisseur:'SCHNEIDER ELECTRIC',ref:'FRN-003',mode:'Traite',num:'TR-0330',emission:'2026-02-15',echeance:'2026-04-20',montant:67500,banque:'ATB',statut:'Échu',commentaire:'Relance envoyée le 22/04'},
+    {id:4,fournisseur:'GENERAL ELECTRIC',ref:'FRN-004',mode:'Chèque',num:'CH-5512',emission:'2026-04-10',echeance:'2026-07-10',montant:220000,banque:'STB',statut:'À échoir',commentaire:''},
+    {id:5,fournisseur:'HONEYWELL INC.',ref:'FRN-005',mode:'Effet',num:'EF-0088',emission:'2026-03-22',echeance:'2026-06-30',montant:78200,banque:'BNA',statut:'À échoir',commentaire:''},
+    {id:6,fournisseur:'ROCKWELL AUTO.',ref:'FRN-006',mode:'Virement',num:'VIR-2241',emission:'2026-01-10',echeance:'2026-03-10',montant:43800,banque:'BIAT',statut:'Régularisé',commentaire:'Réglé le 08/03'},
+  ],
+  devises:[
+    {id:1,fournisseur:'SIEMENS AG',date:'2026-04-10',devise:'EUR',montant:85000,taux:3.35,banque:'BIAT',dossier:'BIA-2026-441',statut:'En cours'},
+    {id:2,fournisseur:'GENERAL ELECTRIC',date:'2026-03-22',devise:'USD',montant:120000,taux:3.08,banque:'STB',dossier:'STB-2026-218',statut:'Partiellement réglé'},
+    {id:3,fournisseur:'ABB SWITZERLAND',date:'2026-04-18',devise:'EUR',montant:42000,taux:3.36,banque:'BNA',dossier:'BNA-2026-105',statut:'En cours'},
+    {id:4,fournisseur:'SCHNEIDER ELECTRIC',date:'2026-02-14',devise:'EUR',montant:95000,taux:3.34,banque:'ATB',dossier:'ATB-2026-073',statut:'Soldé'},
+    {id:5,fournisseur:'HONEYWELL INC.',date:'2026-04-25',devise:'USD',montant:67500,taux:3.09,banque:'BIAT',dossier:'BIA-2026-567',statut:'En cours'},
+    {id:6,fournisseur:'ROCKWELL AUTO.',date:'2026-03-05',devise:'USD',montant:38000,taux:3.07,banque:'BNA',dossier:'BNA-2026-088',statut:'Soldé'},
+  ],
+  mensuels:[
+    {id:1,mois:'Janvier',banque:'BIAT',fournisseur:'SOTUVER',mode:'Virement',num:'VIR-001',date:'2026-01-15',devise:'TND',montantTND:85000},
+    {id:2,mois:'Janvier',banque:'STB',fournisseur:'ERICSSON',mode:'Effet',num:'EF-221',date:'2026-01-22',devise:'EUR',montantTND:120520},
+    {id:3,mois:'Février',banque:'BIAT',fournisseur:'SIEMENS',mode:'Virement',num:'VIR-041',date:'2026-02-10',devise:'EUR',montantTND:168000},
+    {id:4,mois:'Février',banque:'BNA',fournisseur:'ABB',mode:'Traite',num:'TR-774',date:'2026-02-18',devise:'USD',montantTND:92400},
+    {id:5,mois:'Mars',banque:'BIAT',fournisseur:'GE',mode:'Virement',num:'VIR-101',date:'2026-03-05',devise:'USD',montantTND:215600},
+    {id:6,mois:'Mars',banque:'ATB',fournisseur:'SCHNEIDER',mode:'Effet',num:'EF-441',date:'2026-03-20',devise:'EUR',montantTND:143750},
+    {id:7,mois:'Avril',banque:'STB',fournisseur:'HONEYWELL',mode:'Virement',num:'VIR-182',date:'2026-04-08',devise:'USD',montantTND:188300},
+    {id:8,mois:'Avril',banque:'BIAT',fournisseur:'SOTUVER',mode:'Traite',num:'TR-991',date:'2026-04-22',devise:'TND',montantTND:95000},
+    {id:9,mois:'Mai',banque:'BNA',fournisseur:'ROCKWELL',mode:'Virement',num:'VIR-251',date:'2026-05-12',devise:'USD',montantTND:116920},
+    {id:10,mois:'Mai',banque:'UIB',fournisseur:'ABB',mode:'Effet',num:'EF-882',date:'2026-05-25',devise:'EUR',montantTND:140700},
+  ],
+  lignes:[
+    {id:1,banque:'BIAT',color:'#2563EB',initials:'BI',produits:[
+      {nom:'Découvert',auth:2000,used:1340},
+      {nom:'Escompte',auth:3500,used:3200},
+      {nom:'FED',auth:2000,used:980},
+      {nom:'Financement Stocks',auth:1500,used:720},
+      {nom:'Fin. Droits Douane',auth:500,used:180}
+    ]},
+    {id:2,banque:'STB',color:'#10B981',initials:'ST',produits:[
+      {nom:'Découvert',auth:1000,used:860},
+      {nom:'Escompte',auth:1200,used:650},
+      {nom:'FED',auth:800,used:420},
+      {nom:'Financement Stocks',auth:600,used:280},
+      {nom:'Fin. Droits Douane',auth:300,used:90}
+    ]},
+    {id:3,banque:'BNA',color:'#8B5CF6',initials:'BN',produits:[
+      {nom:'Découvert',auth:800,used:410},
+      {nom:'Escompte',auth:1000,used:540},
+      {nom:'FED',auth:600,used:320},
+      {nom:'Financement Stocks',auth:400,used:180},
+      {nom:'Fin. Droits Douane',auth:200,used:60}
+    ]},
+    {id:4,banque:'ATB',color:'#F59E0B',initials:'AT',produits:[
+      {nom:'Découvert',auth:500,used:220},
+      {nom:'Escompte',auth:700,used:380},
+      {nom:'FED',auth:400,used:150},
+      {nom:'Financement Stocks',auth:300,used:110},
+      {nom:'Fin. Droits Douane',auth:100,used:30}
+    ]},
+  ]
+};
+
+// ============================================================
+// LOCALSTORAGE — SAUVEGARDE AUTOMATIQUE
+// ============================================================
+// ============================================================
+// GOOGLE SHEETS — CONFIGURATION
+// ============================================================
+// ⚠️  COLLEZ ICI L'URL DE VOTRE DÉPLOIEMENT GOOGLE APPS SCRIPT
+const GOOGLE_SCRIPT_URL = 'VOTRE_URL_ICI';
+// Exemple : 'https://script.google.com/macros/s/AKfycbXXXXXX/exec'
+// ============================================================
+
+let isSyncing = false;
+
+function setSaveStatus(state) {
+  const ind = document.getElementById('save-indicator');
+  const ico = document.getElementById('save-icon');
+  const txt = document.getElementById('save-text');
+  if (!ind || !ico || !txt) return;
+  ind.style.opacity = '1';
+  if (state === 'saving') {
+    ind.style.color = '#F59E0B';
+    ico.className = 'fas fa-spinner fa-spin';
+    txt.textContent = 'Synchronisation...';
+  } else if (state === 'saved') {
+    ind.style.color = '#10B981';
+    ico.className = 'fas fa-check-circle';
+    txt.textContent = 'Sauvegardé ✓';
+    clearTimeout(window._saveTimer);
+    window._saveTimer = setTimeout(() => ind.style.opacity = '0', 3000);
+  } else if (state === 'error') {
+    ind.style.color = '#EF4444';
+    ico.className = 'fas fa-exclamation-circle';
+    txt.textContent = 'Erreur connexion';
+    clearTimeout(window._saveTimer);
+    window._saveTimer = setTimeout(() => ind.style.opacity = '0', 4000);
+  } else if (state === 'local') {
+    ind.style.color = '#2563EB';
+    ico.className = 'fas fa-save';
+    txt.textContent = 'Sauvegardé localement';
+    clearTimeout(window._saveTimer);
+    window._saveTimer = setTimeout(() => ind.style.opacity = '0', 2000);
+  }
+}
+
+// Sauvegarde locale TOUJOURS en premier
+function saveLocal() {
+  try { localStorage.setItem('fintrack_backup', JSON.stringify(data)); } catch(e) {}
+}
+
+// Chargement local
+function loadLocal() {
+  try {
+    const saved = localStorage.getItem('fintrack_backup');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.impayesClients) data.impayesClients = parsed.impayesClients;
+      if (parsed.impayesFourn)   data.impayesFourn   = parsed.impayesFourn;
+      if (parsed.devises)        data.devises         = parsed.devises;
+      if (parsed.mensuels)       data.mensuels        = parsed.mensuels;
+      if (parsed.lignes)         data.lignes          = parsed.lignes;
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+async function saveData() {
+  // 1. Sauvegarde locale immédiate (toujours)
+  saveLocal();
+
+  // 2. Sync Google Sheets si URL configurée
+  const hasURL = GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== 'VOTRE_URL_ICI';
+  if (!hasURL) { setSaveStatus('local'); return; }
+  if (isSyncing) return;
+  isSyncing = true;
+  setSaveStatus('saving');
+  try {
+    // Utiliser fetch avec mode no-cors (Google Apps Script supporte ça)
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'save', data: data })
+    });
+    // no-cors ne retourne pas de réponse lisible, on considère OK
+    setTimeout(() => { setSaveStatus('saved'); isSyncing = false; }, 1000);
+  } catch(e) {
+    setSaveStatus('error');
+    isSyncing = false;
+  }
+}
+
+async function loadData() {
+  const hasURL = GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== 'VOTRE_URL_ICI';
+
+  // Toujours charger le local d'abord (affichage instantané)
+  loadLocal();
+
+  // Puis essayer Google Sheets en arrière-plan si URL configurée
+  if (hasURL) {
+    try {
+      const res = await Promise.race([
+        fetch(GOOGLE_SCRIPT_URL + '?action=load', { method: 'GET' }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+      ]);
+      const json = await res.json();
+      if (json && json.data) {
+        const d = json.data;
+        if (d.impayesClients) data.impayesClients = d.impayesClients;
+        if (d.impayesFourn)   data.impayesFourn   = d.impayesFourn;
+        if (d.devises)        data.devises         = d.devises;
+        if (d.mensuels)       data.mensuels        = d.mensuels;
+        if (d.lignes)         data.lignes          = d.lignes;
+        // Rafraîchir l'affichage avec les données Google Sheets
+        renderAll();
+      }
+    } catch(e) {
+      // Timeout ou erreur CORS → données locales déjà chargées, on continue
+      console.warn('Google Sheets non disponible, données locales utilisées.');
+    }
+  }
+}
+
+function showLoadingScreen(show) {
+  // Désactivé — l'app s'affiche immédiatement avec les données locales
+}
+
+function resetData() {
+  if (!confirm('Réinitialiser toutes les données aux valeurs par défaut ?\n\nCette action supprimera toutes vos modifications.')) return;
+  localStorage.removeItem('fintrack_backup');
+  location.reload();
+}
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'fintrack_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  showNotif('Sauvegarde JSON exportée ✓');
+}
+
+function importJSON() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+        if (parsed.impayesClients) data.impayesClients = parsed.impayesClients;
+        if (parsed.impayesFourn)   data.impayesFourn   = parsed.impayesFourn;
+        if (parsed.devises)        data.devises         = parsed.devises;
+        if (parsed.mensuels)       data.mensuels        = parsed.mensuels;
+        if (parsed.lignes)         data.lignes          = parsed.lignes;
+        saveData();
+        renderAll();
+        showNotif('Données importées avec succès ✓');
+      } catch(err) {
+        alert('Fichier JSON invalide.');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+const fmt=n=>new Intl.NumberFormat('fr-FR').format(Math.round(n));
+const fmtDate=d=>{if(!d)return'';const p=d.split('-');return`${p[2]}/${p[1]}/${p[0]}`};
+const retardDays=d=>{const diff=Math.round((new Date()-new Date(d))/(864e5));return diff>0?diff:0};
+const statusBadge=s=>{const m={'À échoir':'badge-blue','Échu':'badge-orange','En retard':'badge-red','Régularisé':'badge-green','En cours':'badge-blue','Soldé':'badge-green','Partiellement réglé':'badge-orange'};return`<span class="status-badge ${m[s]||'badge-gray'}">${s}</span>`};
+const showNotif=msg=>{const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(window._tt);window._tt=setTimeout(()=>t.style.display='none',3000)};
+
+// ============================================================
+// AUTH
+// ============================================================
+// ============================================================
+// MOT DE PASSE ADMIN — CHANGEZ ICI SI NÉCESSAIRE
+// ============================================================
+const ADMIN_PASSWORD = 'fintrack2026';
+// ============================================================
+
+function doLogin(){
+  const name = (document.getElementById('login-name')?.value||'').trim();
+  const pass = (document.getElementById('login-pass').value||'').trim();
+  const errDiv = document.getElementById('auth-error');
+  const errMsg = document.getElementById('auth-error-msg');
+
+  if (!name) {
+    errDiv.style.display='block';
+    errMsg.textContent='Veuillez entrer votre nom.';
+    return;
+  }
+  if (pass !== '' && pass !== ADMIN_PASSWORD) {
+    errDiv.style.display='block';
+    errMsg.textContent='Mot de passe incorrect.';
+    document.getElementById('login-pass').value='';
+    return;
+  }
+  errDiv.style.display='none';
+  currentRole = (pass === ADMIN_PASSWORD) ? 'admin' : 'viewer';
+
+  const initials = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('user-name').textContent = name;
+  document.getElementById('user-role-disp').textContent = currentRole==='admin' ? 'Administrateur' : 'Consultation';
+  document.getElementById('user-avatar').textContent = initials;
+  document.getElementById('user-avatar').style.background = currentRole==='admin' ? '#EF4444' : '#2563EB';
+  document.getElementById('nav-admin').style.display = currentRole==='admin' ? 'flex' : 'none';
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('main-alert').style.display='flex';
+  setTimeout(async()=>{
+    loadLocal();       // affichage immédiat avec données locales
+    initCharts();
+    renderAll();
+    applyViewerMode();
+    loadData();        // sync Google Sheets en arrière-plan (sans bloquer)
+  },120);
+}
+
+function applyViewerMode(){
+  const isViewer = currentRole==='viewer';
+  // Masquer boutons action si viewer
+  document.querySelectorAll('button.btn-primary').forEach(b=>b.style.display=isViewer?'none':'');
+  document.querySelectorAll('.table-actions').forEach(b=>b.style.display=isViewer?'none':'');
+  document.querySelectorAll('[onclick*="editRow"],[onclick*="deleteRow"],[onclick*="deleteBank"],[onclick*="openEditBank"],[onclick*="openAddBank"]')
+    .forEach(b=>b.style.display=isViewer?'none':'');
+  // Boutons topbar
+  document.querySelectorAll('[onclick*="exportJSON"],[onclick*="importJSON"],[onclick*="resetData"]')
+    .forEach(b=>b.style.display=isViewer?'none':'');
+  // Badge mode consultation
+  let badge=document.getElementById('viewer-badge');
+  if(isViewer&&!badge){
+    badge=document.createElement('div');
+    badge.id='viewer-badge';
+    badge.style.cssText='background:#EFF6FF;color:#1D4ED8;font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;border:1px solid #BFDBFE;display:flex;align-items:center;gap:6px;white-space:nowrap';
+    badge.innerHTML='<i class="fas fa-eye"></i> Mode consultation';
+    document.querySelector('.topbar-actions').prepend(badge);
+  } else if(!isViewer&&badge){
+    badge.remove();
+  }
+}
+
+function doLogout(){
+  document.getElementById('auth-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  Object.values(chartInstances).forEach(c=>{try{c.destroy()}catch(e){}});
+  chartInstances={};
+  // Reset viewer badge
+  const badge=document.getElementById('viewer-badge');
+  if(badge)badge.remove();
+  // Reset champ nom
+  const nameEl=document.getElementById('login-name');
+  if(nameEl)nameEl.value='';
+  document.getElementById('login-pass').value='';
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showPage(page,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(el)el.classList.add('active');
+  const titles={'dashboard':'Tableau de bord','impayes-clients':'Impayés Clients','impayes-fourn':'Impayés Fournisseurs','devises':'Engagements en Devise','mensuels':'Engagements Mensuels','lignes':'Lignes Bancaires','rapports':'Rapports Financiers','admin':'Administration'};
+  document.getElementById('page-title').textContent=titles[page]||page;
+  if(page==='dashboard'){renderDashboard();}
+  if(page==='impayes-clients'){refreshAllBankDropdowns();renderImpayesClients();applyViewerMode();}
+  if(page==='impayes-fourn'){refreshAllBankDropdowns();renderImpayesFourn();updateFournKPI();applyViewerMode();}
+  if(page==='devises'){refreshAllBankDropdowns();renderDevises();updateDevisesKPI();applyViewerMode();}
+  if(page==='mensuels'){refreshAllBankDropdowns();renderMensuels();renderMonthlyCharts();applyViewerMode();}
+  if(page==='lignes'){renderBankCards();updateLignesKPI();applyViewerMode();}
+}
+
+// ============================================================
+// CHARTS
+// ============================================================
+// ============================================================
+// BANQUES DYNAMIQUES — lit data.lignes + banques des données
+// ============================================================
+function getAllBanques(){
+  // Banques des lignes bancaires + banques déjà utilisées dans les données
+  const fromLignes = data.lignes.map(b=>b.banque);
+  const fromData   = [
+    ...data.impayesClients.map(r=>r.banque),
+    ...data.impayesFourn.map(r=>r.banque),
+    ...data.devises.map(r=>r.banque),
+    ...data.mensuels.map(r=>r.banque),
+  ];
+  return [...new Set([...fromLignes,...fromData])].filter(Boolean).sort();
+}
+
+function getBanquesOpts(selectedVal){
+  return getAllBanques().map(b=>`<option${selectedVal===b?' selected':''}>${b}</option>`).join('');
+}
+
+function refreshAllBankDropdowns(){
+  const banks = getAllBanques();
+  const makeOpts = (cur) => `<option value="">Toutes banques</option>`+banks.map(b=>`<option${cur===b?' selected':''}>${b}</option>`).join('');
+
+  // Filtres
+  ['fc-banque','ff-banque','f-banque-d','f-banque-m'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){const cur=el.value;el.innerHTML=makeOpts(cur);}
+  });
+  // Selects dans modal (si ouverts)
+  const fb=document.getElementById('f_banque');
+  if(fb){const cur=fb.value;fb.innerHTML=banks.map(b=>`<option${cur===b?' selected':''}>${b}</option>`).join('');}
+}
+
+// ============================================================
+// DASHBOARD — RENDU DYNAMIQUE
+// ============================================================
+function renderDashboard(){
+  const now = new Date();
+
+  // ---- KPI Impayés Clients ----
+  const clientsActifs = data.impayesClients.filter(r=>r.statut!=='Régularisé');
+  const totalClients  = clientsActifs.reduce((s,r)=>s+r.montant,0);
+  const retardClients = clientsActifs.filter(r=>r.statut==='En retard'||r.statut==='Échu').length;
+  document.getElementById('db-kpi-clients').textContent = fmt(totalClients)+' TND';
+  document.getElementById('db-kpi-clients-sub').innerHTML = retardClients>0
+    ? `<i class="fas fa-exclamation-triangle" style="color:var(--red)"></i> ${retardClients} en retard`
+    : `<i class="fas fa-check-circle" style="color:var(--green)"></i> Aucun retard`;
+
+  // ---- KPI Impayés Fournisseurs ----
+  const fournActifs = data.impayesFourn.filter(r=>r.statut!=='Régularisé');
+  const totalFourn  = fournActifs.reduce((s,r)=>s+r.montant,0);
+  const retardFourn = fournActifs.filter(r=>r.statut==='En retard'||r.statut==='Échu').length;
+  document.getElementById('db-kpi-fourn').textContent = fmt(totalFourn)+' TND';
+  document.getElementById('db-kpi-fourn-sub').innerHTML = retardFourn>0
+    ? `<i class="fas fa-exclamation-triangle" style="color:var(--red)"></i> ${retardFourn} en retard`
+    : `<i class="fas fa-check-circle" style="color:var(--green)"></i> Aucun retard`;
+
+  // ---- KPI Devises ----
+  const devisesActifs = data.devises.filter(r=>r.statut!=='Soldé');
+  const totalDevises  = devisesActifs.reduce((s,r)=>s+r.montant*r.taux,0);
+  document.getElementById('db-kpi-devises').textContent = fmt(totalDevises)+' TND';
+  document.getElementById('db-kpi-devises-sub').textContent = devisesActifs.length+' engagements actifs';
+
+  // ---- KPI Lignes Bancaires ----
+  const totalAuth = data.lignes.reduce((s,b)=>s+b.produits.reduce((ss,p)=>ss+p.auth,0),0);
+  const totalUsed = data.lignes.reduce((s,b)=>s+b.produits.reduce((ss,p)=>ss+p.used,0),0);
+  const pctGlobal = totalAuth>0 ? Math.round(totalUsed/totalAuth*100) : 0;
+  const lignesAlerte = data.lignes.filter(b=>{
+    const a=b.produits.reduce((s,p)=>s+p.auth,0),u=b.produits.reduce((s,p)=>s+p.used,0);
+    return a>0&&Math.round(u/a*100)>=80;
+  }).length;
+  document.getElementById('db-kpi-lignes').textContent = pctGlobal+'%';
+  document.getElementById('db-kpi-lignes-sub').innerHTML = lignesAlerte>0
+    ? `<i class="fas fa-exclamation-triangle" style="color:var(--orange)"></i> ${lignesAlerte} ligne(s) > 80%`
+    : `<i class="fas fa-check-circle" style="color:var(--green)"></i> Toutes lignes OK`;
+
+  // ---- ALERTES ÉCHÉANCES ----
+  const allEch = [
+    ...data.impayesClients.filter(r=>r.statut!=='Régularisé').map(r=>({nom:r.client,info:'Client · '+r.mode+' '+r.num,date:r.echeance})),
+    ...data.impayesFourn.filter(r=>r.statut!=='Régularisé').map(r=>({nom:r.fournisseur,info:'Fournisseur · '+r.mode+' '+r.num,date:r.echeance}))
+  ];
+  const mkAlertItem=(r,bg,badgeBg,badgeColor)=>{
+    const days=Math.round((new Date(r.date)-now)/(864e5));
+    return`<div class="alert-item" style="background:${bg}">
+      <div><div class="alert-item-name">${r.nom}</div><div class="alert-item-info">${r.info}</div></div>
+      <span class="alert-badge" style="background:${badgeBg};color:${badgeColor}">${days>=0?'J+'+days:'J'+days}</span>
+    </div>`;
+  };
+  const emptyAlert=`<div style="text-align:center;padding:16px;color:#94A3B8;font-size:12px"><i class="fas fa-check-circle" style="color:#10B981"></i> Aucune échéance</div>`;
+
+  const ech7  = allEch.filter(r=>{const d=Math.round((new Date(r.date)-now)/(864e5));return d>=0&&d<7});
+  const ech15 = allEch.filter(r=>{const d=Math.round((new Date(r.date)-now)/(864e5));return d>=7&&d<=15});
+  document.getElementById('db-alert-7').innerHTML  = ech7.length  ? ech7.map(r=>mkAlertItem(r,'#FEF2F2','#FEE2E2','#991B1B')).join('') : emptyAlert;
+  document.getElementById('db-alert-15').innerHTML = ech15.length ? ech15.map(r=>mkAlertItem(r,'#FFFBEB','#FDE68A','#92400E')).join('') : emptyAlert;
+
+  // Lignes > 80%
+  const alertLignes=[];
+  data.lignes.forEach(b=>{
+    b.produits.forEach(p=>{
+      const pct=p.auth>0?Math.round(p.used/p.auth*100):0;
+      if(pct>=80) alertLignes.push({nom:`${b.banque} – ${p.nom}`,info:`${fmt(p.used)}K / ${fmt(p.auth)}K KTND`,pct});
+    });
+  });
+  document.getElementById('db-alert-lignes').innerHTML = alertLignes.length
+    ? alertLignes.map(r=>`<div class="alert-item" style="background:#EFF6FF"><div><div class="alert-item-name">${r.nom}</div><div class="alert-item-info">${r.info}</div></div><span class="alert-badge" style="background:#DBEAFE;color:#1D4ED8">${r.pct}%</span></div>`).join('')
+    : `<div style="text-align:center;padding:16px;color:#94A3B8;font-size:12px"><i class="fas fa-check-circle" style="color:#10B981"></i> Aucun dépassement</div>`;
+
+  // ---- MISE À JOUR GRAPHIQUES ----
+  // Courbe impayés par mois
+  const clientsByMonth=Array(12).fill(0), fournByMonth=Array(12).fill(0);
+  data.impayesClients.filter(r=>r.statut!=='Régularisé').forEach(r=>{if(r.echeance){const m=parseInt(r.echeance.split('-')[1])-1;if(m>=0&&m<12)clientsByMonth[m]+=r.montant;}});
+  data.impayesFourn.filter(r=>r.statut!=='Régularisé').forEach(r=>{if(r.echeance){const m=parseInt(r.echeance.split('-')[1])-1;if(m>=0&&m<12)fournByMonth[m]+=r.montant;}});
+  if(chartInstances['chart-impayes']){chartInstances['chart-impayes'].data.datasets[0].data=clientsByMonth;chartInstances['chart-impayes'].data.datasets[1].data=fournByMonth;chartInstances['chart-impayes'].update();}
+
+  // Pie lignes
+  if(chartInstances['chart-banques-pie']){
+    chartInstances['chart-banques-pie'].data.labels=data.lignes.map(b=>b.banque);
+    chartInstances['chart-banques-pie'].data.datasets[0].data=data.lignes.map(b=>b.produits.reduce((s,p)=>s+p.used,0));
+    chartInstances['chart-banques-pie'].data.datasets[0].backgroundColor=data.lignes.map(b=>b.color);
+    chartInstances['chart-banques-pie'].update();
+  }
+
+  // Bar devises par mois
+  const eur12=Array(12).fill(0),usd12=Array(12).fill(0);
+  data.devises.filter(r=>r.statut!=='Soldé').forEach(r=>{if(r.date){const m=parseInt(r.date.split('-')[1])-1;if(m>=0&&m<12){if(r.devise==='EUR')eur12[m]+=r.montant*r.taux;else usd12[m]+=r.montant*r.taux;}}});
+  if(chartInstances['chart-devises']){chartInstances['chart-devises'].data.datasets[0].data=eur12;chartInstances['chart-devises'].data.datasets[1].data=usd12;chartInstances['chart-devises'].update();}
+
+  // Bar règlements par banque — dynamique depuis getAllBanques
+  const bColors2=['#2563EB','#10B981','#8B5CF6','#F59E0B','#EF4444','#0891B2','#DB2777','#D97706'];
+  const allBanks=getAllBanques();
+  const banksWithData=allBanks.filter(b=>data.mensuels.some(r=>r.banque===b));
+  if(chartInstances['chart-banks-bar']){
+    chartInstances['chart-banks-bar'].data.labels=banksWithData;
+    chartInstances['chart-banks-bar'].data.datasets[0].data=banksWithData.map(b=>Math.round(data.mensuels.filter(r=>r.banque===b).reduce((s,r)=>s+r.montantTND,0)/1000));
+    chartInstances['chart-banks-bar'].data.datasets[0].backgroundColor=banksWithData.map((_,i)=>bColors2[i%bColors2.length]);
+    chartInstances['chart-banks-bar'].update();
+  }
+}
+
+function mkChart(id,type,d,o){
+  const c=document.getElementById(id);if(!c)return;
+  if(chartInstances[id])try{chartInstances[id].destroy()}catch(e){}
+  chartInstances[id]=new Chart(c.getContext('2d'),{type,data:d,options:o});
+}
+function initCharts(){
+  mkChart('chart-impayes','line',
+    {labels:['Jan','Fév','Mar','Avr','Mai','Jun'],datasets:[
+      {label:'Clients',data:[1200000,1350000,1180000,1620000,1847500,null],borderColor:'#EF4444',backgroundColor:'rgba(239,68,68,.07)',tension:.4,fill:true,borderWidth:2,pointRadius:4,spanGaps:false},
+      {label:'Fournisseurs',data:[450000,510000,480000,590000,643200,null],borderColor:'#0891B2',backgroundColor:'rgba(8,145,178,.07)',tension:.4,fill:true,borderWidth:2,pointRadius:4,spanGaps:false}
+    ]},
+    {responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11},boxWidth:12,padding:12}}},scales:{y:{ticks:{callback:v=>(v/1000).toFixed(0)+'K',font:{size:11}},grid:{color:'#F1F5F9'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}
+  );
+  mkChart('chart-banques-pie','doughnut',
+    {labels:['BIAT','STB','BNA','ATB'],datasets:[{data:[42,22,18,18],backgroundColor:['#2563EB','#10B981','#8B5CF6','#F59E0B'],borderWidth:2,borderColor:'#fff'}]},
+    {responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12,padding:10}}},cutout:'60%'}
+  );
+  mkChart('chart-devises','bar',
+    {labels:['Jan','Fév','Mar','Avr','Mai'],datasets:[
+      {label:'EUR',data:[283500,445200,318600,415200,285600],backgroundColor:'rgba(139,92,246,.75)',borderRadius:4},
+      {label:'USD',data:[184800,277200,206100,369600,208500],backgroundColor:'rgba(16,185,129,.75)',borderRadius:4}
+    ]},
+    {responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11},boxWidth:12}}},scales:{x:{ticks:{font:{size:11}},grid:{display:false}},y:{ticks:{callback:v=>(v/1000).toFixed(0)+'K',font:{size:11}},grid:{color:'#F1F5F9'}}}}
+  );
+  mkChart('chart-banks-bar','bar',
+    {labels:['BIAT','STB','BNA','ATB','UIB'],datasets:[{data:[548,319,210,143,141],backgroundColor:['#2563EB','#10B981','#8B5CF6','#F59E0B','#EF4444'],borderRadius:6}]},
+    {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:11}},grid:{display:false}},y:{ticks:{callback:v=>v+'K',font:{size:11}},grid:{color:'#F1F5F9'}}}}
+  );
+}
+function renderMonthlyCharts(){
+  const bColors=['#2563EB','#10B981','#8B5CF6','#F59E0B','#EF4444','#0891B2','#DB2777','#D97706'];
+
+  // Mois : tous les mois présents dans les données (dans l'ordre calendaire)
+  const moisOrdre=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const months = moisOrdre.filter(m=>data.mensuels.some(r=>r.mois===m));
+
+  // Banques : dynamique depuis les données mensuels + lignes bancaires
+  const banks = getAllBanques().filter(b=>data.mensuels.some(r=>r.banque===b)||data.lignes.some(l=>l.banque===b));
+  const bankColors = banks.map((_,i)=>bColors[i%bColors.length]);
+
+  // Histogramme mensuel
+  mkChart('chart-monthly-bar','bar',
+    {labels:months.map(m=>m.slice(0,3)),
+     datasets:[{
+       data:months.map(m=>data.mensuels.filter(r=>r.mois===m).reduce((s,r)=>s+r.montantTND,0)),
+       backgroundColor:'#2563EB',borderRadius:6
+     }]},
+    {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+     scales:{x:{ticks:{font:{size:11}},grid:{display:false}},y:{ticks:{callback:v=>(v/1000).toFixed(0)+'K',font:{size:11}},grid:{color:'#F1F5F9'}}}}
+  );
+
+  // Classement par banque — 100% dynamique
+  const bankTotals = banks.map(b=>data.mensuels.filter(r=>r.banque===b).reduce((s,r)=>s+r.montantTND,0));
+  // Trier du plus grand au plus petit
+  const sorted = banks.map((b,i)=>({b,v:bankTotals[i],c:bankColors[i]})).sort((a,z)=>z.v-a.v);
+
+  mkChart('chart-bank-rank','bar',
+    {labels:sorted.map(s=>s.b),
+     datasets:[{
+       data:sorted.map(s=>s.v),
+       backgroundColor:sorted.map(s=>s.c),
+       borderRadius:6
+     }]},
+    {indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+     scales:{x:{ticks:{callback:v=>(v/1000).toFixed(0)+'K',font:{size:11}},grid:{color:'#F1F5F9'}},
+             y:{ticks:{font:{size:11}},grid:{display:false}}}}
+  );
+}
+
+// ============================================================
+// TABLE HELPERS
+// ============================================================
+function impayeRow(r,type){
+  const retard=retardDays(r.echeance);
+  const name=type==='client'?r.client:r.fournisseur;
+  return`<tr>
+    <td><b>${name}</b></td>
+    <td style="color:#64748B;font-size:12px">${r.ref}</td>
+    <td><span class="status-badge badge-gray">${r.mode}</span></td>
+    <td>${r.num}</td>
+    <td>${fmtDate(r.emission)}</td>
+    <td>${fmtDate(r.echeance)}</td>
+    <td style="font-weight:600;font-variant-numeric:tabular-nums">${fmt(r.montant)}</td>
+    <td><span class="status-badge badge-blue">${r.banque}</span></td>
+    <td>${retard>0?`<span style="color:#EF4444;font-weight:600">J+${retard}</span>`:'<span style="color:#10B981;font-size:12px">–</span>'}</td>
+    <td>${statusBadge(r.statut)}</td>
+    <td style="white-space:nowrap">
+      <button class="btn-sm btn-outline" style="padding:4px 8px" onclick="editRow('impaye-${type}',${r.id})"><i class="fas fa-edit"></i></button>
+      <button class="btn-sm btn-outline" style="padding:4px 8px;color:#EF4444;margin-left:4px" onclick="deleteRow('${type==='client'?'impayesClients':'impayesFourn'}',${r.id},'${type}')"><i class="fas fa-trash"></i></button>
+    </td>
+  </tr>`;
+}
+
+// ============================================================
+// IMPAYES CLIENTS
+// ============================================================
+function renderImpayesClients(list){
+  const rows=list||data.impayesClients;
+  document.getElementById('impayes-clients-body').innerHTML=rows.length?rows.map(r=>impayeRow(r,'client')).join(''):'<tr><td colspan="11" style="text-align:center;padding:32px;color:#94A3B8">Aucun enregistrement trouvé</td></tr>';
+  document.getElementById('badge-clients').textContent=data.impayesClients.filter(r=>r.statut==='En retard'||r.statut==='Échu').length;
+}
+function filterImpayesClients(){
+  const c=document.getElementById('fc-client').value.toLowerCase(),m=document.getElementById('fc-mode').value,s=document.getElementById('fc-statut').value,b=document.getElementById('fc-banque').value,mo=document.getElementById('fc-mois').value;
+  renderImpayesClients(data.impayesClients.filter(r=>(!c||r.client.toLowerCase().includes(c))&&(!m||r.mode===m)&&(!s||r.statut===s)&&(!b||r.banque===b)&&(!mo||r.echeance.startsWith(mo))));
+}
+
+// ============================================================
+// IMPAYES FOURNISSEURS
+// ============================================================
+function updateFournKPI(){
+  const actifs=data.impayesFourn.filter(r=>r.statut!=='Régularisé');
+  const retard=actifs.filter(r=>r.statut==='En retard'||r.statut==='Échu');
+  const aechoir=actifs.filter(r=>{const d=new Date(r.echeance),now=new Date();return d>=now&&(d-now)/(864e5)<=30});
+  document.getElementById('kpi-fourn-total').textContent=fmt(actifs.reduce((s,r)=>s+r.montant,0))+' TND';
+  document.getElementById('kpi-fourn-retard').textContent=fmt(retard.reduce((s,r)=>s+r.montant,0))+' TND';
+  document.getElementById('kpi-fourn-aechoir').textContent=fmt(aechoir.reduce((s,r)=>s+r.montant,0))+' TND';
+  document.getElementById('badge-fourn').textContent=retard.length;
+}
+function renderImpayesFourn(list){
+  const rows=list||data.impayesFourn;
+  document.getElementById('impayes-fourn-body').innerHTML=rows.length?rows.map(r=>impayeRow(r,'fourn')).join(''):'<tr><td colspan="11" style="text-align:center;padding:32px;color:#94A3B8">Aucun enregistrement trouvé</td></tr>';
+}
+function filterImpayesFourn(){
+  const f=document.getElementById('ff-fourn').value.toLowerCase(),m=document.getElementById('ff-mode').value,s=document.getElementById('ff-statut').value,b=document.getElementById('ff-banque').value,mo=document.getElementById('ff-mois').value;
+  renderImpayesFourn(data.impayesFourn.filter(r=>(!f||r.fournisseur.toLowerCase().includes(f))&&(!m||r.mode===m)&&(!s||r.statut===s)&&(!b||r.banque===b)&&(!mo||r.echeance.startsWith(mo))));
+}
+
+// ============================================================
+// DEVISES
+// ============================================================
+function updateDevisesKPI(){
+  const actifs=data.devises.filter(r=>r.statut!=='Soldé');
+  document.getElementById('kpi-eur').textContent=fmt(actifs.filter(r=>r.devise==='EUR').reduce((s,r)=>s+r.montant,0))+' EUR';
+  document.getElementById('kpi-usd').textContent=fmt(actifs.filter(r=>r.devise==='USD').reduce((s,r)=>s+r.montant,0))+' USD';
+  document.getElementById('kpi-tnd-total').textContent=fmt(actifs.reduce((s,r)=>s+r.montant*r.taux,0))+' TND';
+}
+function renderDevises(list){
+  const rows=list||data.devises;
+  document.getElementById('devises-body').innerHTML=rows.length?rows.map(r=>`<tr>
+    <td><b>${r.fournisseur}</b></td><td>${fmtDate(r.date)}</td>
+    <td><span class="status-badge ${r.devise==='EUR'?'badge-purple':'badge-green'}">${r.devise}</span></td>
+    <td style="font-variant-numeric:tabular-nums">${fmt(r.montant)}</td>
+    <td>${r.taux.toFixed(3)}</td>
+    <td style="font-weight:600;font-variant-numeric:tabular-nums">${fmt(r.montant*r.taux)} TND</td>
+    <td><span class="status-badge badge-blue">${r.banque}</span></td>
+    <td style="font-size:12px;color:#64748B">${r.dossier}</td>
+    <td>${statusBadge(r.statut)}</td>
+    <td style="white-space:nowrap">
+      <button class="btn-sm btn-outline" style="padding:4px 8px" onclick="editRow('devise',${r.id})"><i class="fas fa-edit"></i></button>
+      <button class="btn-sm btn-outline" style="padding:4px 8px;color:#EF4444;margin-left:4px" onclick="deleteRow('devises',${r.id},'devise')"><i class="fas fa-trash"></i></button>
+    </td>
+  </tr>`).join(''):'<tr><td colspan="10" style="text-align:center;padding:32px;color:#94A3B8">Aucun enregistrement trouvé</td></tr>';
+}
+function filterDevises(){
+  const f=document.getElementById('f-fourn-d').value.toLowerCase(),d=document.getElementById('f-devise').value,s=document.getElementById('f-statut-d').value,b=document.getElementById('f-banque-d').value;
+  renderDevises(data.devises.filter(r=>(!f||r.fournisseur.toLowerCase().includes(f))&&(!d||r.devise===d)&&(!s||r.statut===s)&&(!b||r.banque===b)));
+}
+
+// ============================================================
+// MENSUELS
+// ============================================================
+function renderMensuels(list){
+  const rows=list||data.mensuels;
+  document.getElementById('mensuels-body').innerHTML=rows.length?rows.map(r=>`<tr>
+    <td>${r.mois}</td><td><span class="status-badge badge-blue">${r.banque}</span></td>
+    <td>${r.fournisseur}</td><td><span class="status-badge badge-gray">${r.mode}</span></td>
+    <td>${r.num}</td><td>${fmtDate(r.date)}</td><td>${r.devise}</td>
+    <td style="font-weight:600;font-variant-numeric:tabular-nums">${fmt(r.montantTND)} TND</td>
+    <td style="white-space:nowrap">
+      <button class="btn-sm btn-outline" style="padding:4px 8px" onclick="editRow('mensuel',${r.id})"><i class="fas fa-edit"></i></button>
+      <button class="btn-sm btn-outline" style="padding:4px 8px;color:#EF4444;margin-left:4px" onclick="deleteRow('mensuels',${r.id},'mensuel')"><i class="fas fa-trash"></i></button>
+    </td>
+  </tr>`).join(''):'<tr><td colspan="9" style="text-align:center;padding:32px;color:#94A3B8">Aucun enregistrement</td></tr>';
+  // totals
+  const td=document.getElementById('monthly-totals');td.innerHTML='';
+  [{lbl:'Total général',val:fmt(data.mensuels.reduce((s,r)=>s+r.montantTND,0))+' TND',c:'#2563EB'},{lbl:'Mai 2026',val:fmt(data.mensuels.filter(r=>r.mois==='Mai').reduce((s,r)=>s+r.montantTND,0))+' TND',c:'#10B981'},{lbl:'Transactions',val:data.mensuels.length,c:'#8B5CF6'},{lbl:'Banque principale',val:'BIAT',c:'#F59E0B'}]
+  .forEach(s=>td.innerHTML+=`<div class="monthly-stat"><div class="val" style="color:${s.c}">${s.val}</div><div class="lbl">${s.lbl}</div></div>`);
+}
+function filterMensuels(){
+  const m=document.getElementById('f-mois-m').value,b=document.getElementById('f-banque-m').value,f=document.getElementById('f-fourn-m').value.toLowerCase();
+  renderMensuels(data.mensuels.filter(r=>(!m||r.mois===m)&&(!b||r.banque===b)&&(!f||r.fournisseur.toLowerCase().includes(f))));
+}
+
+// ============================================================
+// LIGNES BANCAIRES — KPI + CARDS
+// ============================================================
+function updateLignesKPI(){
+  const ta=data.lignes.reduce((s,b)=>s+b.produits.reduce((ss,p)=>ss+p.auth,0),0);
+  const tu=data.lignes.reduce((s,b)=>s+b.produits.reduce((ss,p)=>ss+p.used,0),0);
+  const pct=Math.round(tu/ta*100);
+  const alerte=data.lignes.filter(b=>{const ba=b.produits.reduce((s,p)=>s+p.auth,0),bu=b.produits.reduce((s,p)=>s+p.used,0);return Math.round(bu/ba*100)>=80}).length;
+  document.getElementById('lignes-total-auth').textContent=fmt(ta)+' KTND';
+  document.getElementById('lignes-total-used').textContent=fmt(tu)+' KTND';
+  document.getElementById('lignes-total-dispo').textContent=fmt(ta-tu)+' KTND';
+  document.getElementById('lignes-pct-used').textContent=pct+'% du total';
+  document.getElementById('lignes-pct-dispo').textContent=(100-pct)+'% disponible';
+  document.getElementById('lignes-alerte').textContent=alerte;
+}
+function renderBankCards(){
+  updateLignesKPI();
+  const container=document.getElementById('bank-cards');container.innerHTML='';
+  data.lignes.forEach(b=>{
+    const ta=b.produits.reduce((s,p)=>s+p.auth,0),tu=b.produits.reduce((s,p)=>s+p.used,0),pct=Math.round(tu/ta*100);
+    const ph=b.produits.map((p,i)=>{
+      const pp=Math.round(p.used/p.auth*100),cls=pp>=80?'prog-red':pp>=60?'prog-orange':'prog-green';
+      return`<div class="bank-product">
+        <div class="bank-product-header">
+          <span class="bank-product-name">${p.nom}</span>
+          <span class="bank-product-amounts">${fmt(p.used)}K / ${fmt(p.auth)}K KTND &nbsp;·&nbsp; <b style="color:${pp>=80?'#EF4444':pp>=60?'#F59E0B':'#10B981'}">${pp}%</b></span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill ${cls}" style="width:${pp}%"></div></div>
+        <div style="font-size:10px;color:#64748B;margin-top:3px">Disponible : <span style="color:${(p.auth-p.used)<p.auth*.2?'#EF4444':'#10B981'};font-weight:600">${fmt(p.auth-p.used)}K KTND</span></div>
+      </div>`;
+    }).join('');
+    container.innerHTML+=`<div class="bank-card">
+      <div class="bank-header">
+        <div class="bank-avatar" style="background:${b.color}22;color:${b.color}">${b.initials}</div>
+        <div><div class="bank-name">${b.banque}</div><div class="bank-total">Plafond global : ${fmt(ta)}K KTND</div></div>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button class="btn-sm btn-outline" style="padding:5px 12px" onclick="openEditBankModal(${b.id})"><i class="fas fa-edit"></i> Modifier</button>
+          <button class="btn-sm btn-outline" style="padding:5px 12px;color:#EF4444;border-color:#FECACA!important" onclick="deleteBank(${b.id},'${b.banque}')"><i class="fas fa-trash"></i> Supprimer</button>
+        </div>
+      </div>
+      ${pct>=80?`<div style="background:#FEF2F2;color:#991B1B;font-size:11px;font-weight:600;padding:6px 12px;border-radius:8px;margin-bottom:14px"><i class="fas fa-exclamation-triangle"></i> Utilisation globale : ${pct}% — Seuil 80% dépassé</div>`:''}
+      ${ph}
+      <div class="bank-summary">
+        <div class="bank-stat"><div class="bank-stat-val">${fmt(ta)}K</div><div class="bank-stat-lbl">Autorisé</div></div>
+        <div class="bank-stat"><div class="bank-stat-val" style="color:${pct>=80?'#EF4444':'#F59E0B'}">${fmt(tu)}K</div><div class="bank-stat-lbl">Utilisé</div></div>
+        <div class="bank-stat"><div class="bank-stat-val" style="color:#10B981">${fmt(ta-tu)}K</div><div class="bank-stat-lbl">Disponible</div></div>
+        <div class="bank-stat"><div class="bank-stat-val" style="color:${pct>=80?'#EF4444':'#F59E0B'}">${pct}%</div><div class="bank-stat-lbl">Utilisation</div></div>
+      </div>
+    </div>`;
+  });
+}
+
+// ============================================================
+// MODALS
+// ============================================================
+function openModal(type,prefill){
+  editId=null;editModule=type;
+  document.getElementById('modal-overlay').classList.add('show');
+  document.getElementById('modal-title').textContent={
+    'impaye-client':'Nouvel impayé client','impaye-fourn':'Nouvel impayé fournisseur',
+    'devise':'Nouvel engagement devise','mensuel':'Ajouter règlement mensuel',
+    'user':'Ajouter utilisateur'
+  }[type]||'Ajouter';
+  document.getElementById('modal-body').innerHTML=getForms(type,prefill||{});
+}
+function openEditBankModal(id){
+  const b=data.lignes.find(r=>r.id===id);if(!b)return;
+  editId=id;editModule='ligne';
+  document.getElementById('modal-overlay').classList.add('show');
+  document.getElementById('modal-title').textContent='Modifier lignes — '+b.banque;
+  document.getElementById('modal-body').innerHTML=getBankForm(b);
+}
+function openAddBankModal(){
+  editId=null;editModule='ligne-new';
+  document.getElementById('modal-overlay').classList.add('show');
+  document.getElementById('modal-title').textContent='Ajouter une banque';
+  document.getElementById('modal-body').innerHTML=getNewBankForm();
+}
+function editRow(type,id){
+  let item;
+  if(type==='impaye-client')item=data.impayesClients.find(r=>r.id===id);
+  else if(type==='impaye-fourn')item=data.impayesFourn.find(r=>r.id===id);
+  else if(type==='devise')item=data.devises.find(r=>r.id===id);
+  else if(type==='mensuel')item=data.mensuels.find(r=>r.id===id);
+  if(!item)return;
+  editId=id;editModule=type;
+  document.getElementById('modal-overlay').classList.add('show');
+  document.getElementById('modal-title').textContent='Modifier enregistrement';
+  document.getElementById('modal-body').innerHTML=getForms(type,item);
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('show');editId=null;editModule=null}
+
+function getBankForm(b){
+  let h=`<div style="margin-bottom:16px"><div style="display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;border-radius:8px;background:${b.color}22;color:${b.color};display:flex;align-items:center;justify-content:center;font-weight:700">${b.initials}</div><span style="font-size:15px;font-weight:600">${b.banque}</span></div></div>`;
+  h+=`<div class="form-section-title">Autorisations et utilisations (en KTND)</div>`;
+  b.produits.forEach((p,i)=>{
+    h+=`<div class="form-row">
+      <div class="form-group"><label>${p.nom} — Autorisation</label><input type="number" id="auth_${i}" value="${p.auth}" min="0" step="50"></div>
+      <div class="form-group"><label>${p.nom} — Utilisation</label><input type="number" id="used_${i}" value="${p.used}" min="0" step="10"></div>
+    </div>`;
+  });
+  return h;
+}
+function getNewBankForm(){
+  const produits=['Découvert','Escompte','FED','Financement Stocks','Fin. Droits Douane'];
+  let h=`<div class="form-row"><div class="form-group"><label>Nom de la banque</label><input id="new-bank-name" placeholder="Ex: AMEN BANK"></div><div class="form-group"><label>Couleur (hex)</label><input id="new-bank-color" type="color" value="#6366F1" style="height:40px;padding:4px;cursor:pointer"></div></div>`;
+  h+=`<div class="form-section-title">Autorisations initiales (KTND)</div>`;
+  produits.forEach((p,i)=>{
+    h+=`<div class="form-row"><div class="form-group"><label>${p} — Autorisation</label><input type="number" id="new_auth_${i}" value="500" min="0" step="50"></div><div class="form-group"><label>${p} — Utilisation</label><input type="number" id="new_used_${i}" value="0" min="0" step="10"></div></div>`;
+  });
+  return h;
+}
+
+function getForms(type,d){
+  const banquesOpts = getBanquesOpts(d.banque||'');
+  const modeOpts='<option>Chèque</option><option>Traite</option><option>Virement</option><option>Effet</option>';
+  const statutOpts='<option>À échoir</option><option>Échu</option><option>En retard</option><option>Régularisé</option>';
+  const selVal=(id,val)=>{setTimeout(()=>{const el=document.getElementById(id);if(el&&val)el.value=val},0)};
+
+  if(type==='impaye-client'||type==='impaye-fourn'){
+    const label=type==='impaye-client'?'Client':'Fournisseur';
+    const nameVal=type==='impaye-client'?(d.client||''):(d.fournisseur||'');
+    setTimeout(()=>{selVal('f_mode',d.mode);selVal('f_banque',d.banque);selVal('f_statut',d.statut)},0);
+    return`
+    <div class="form-row"><div class="form-group"><label>${label}</label><input id="f_name" value="${nameVal}" placeholder="Nom ${label.toLowerCase()}"></div><div class="form-group"><label>Référence</label><input id="f_ref" value="${d.ref||''}" placeholder="${label.slice(0,3).toUpperCase()}-001"></div></div>
+    <div class="form-row"><div class="form-group"><label>Mode de règlement</label><select id="f_mode">${modeOpts}</select></div><div class="form-group"><label>N° Règlement</label><input id="f_num" value="${d.num||''}" placeholder="TR-0001"></div></div>
+    <div class="form-row"><div class="form-group"><label>Date d'émission</label><input type="date" id="f_emission" value="${d.emission||''}"></div><div class="form-group"><label>Date d'échéance</label><input type="date" id="f_echeance" value="${d.echeance||''}"></div></div>
+    <div class="form-row"><div class="form-group"><label>Montant (TND)</label><input type="number" id="f_montant" value="${d.montant||''}" placeholder="0.000"></div><div class="form-group"><label>Banque</label><select id="f_banque">${banquesOpts}</select></div></div>
+    <div class="form-row"><div class="form-group"><label>Statut</label><select id="f_statut">${statutOpts}</select></div></div>
+    <div class="form-row full"><div class="form-group"><label>Commentaires</label><textarea id="f_commentaire">${d.commentaire||''}</textarea></div></div>`;
+  }
+  if(type==='devise'){
+    setTimeout(()=>{selVal('f_devise',d.devise);selVal('f_banque',d.banque);selVal('f_statut_d',d.statut)},0);
+    return`
+    <div class="form-row"><div class="form-group"><label>Fournisseur</label><input id="f_fournisseur" value="${d.fournisseur||''}" placeholder="SIEMENS AG"></div><div class="form-group"><label>Date d'engagement</label><input type="date" id="f_date" value="${d.date||''}"></div></div>
+    <div class="form-row"><div class="form-group"><label>Devise</label><select id="f_devise" onchange="calcTND()"><option>EUR</option><option>USD</option></select></div><div class="form-group"><label>Montant en devise</label><input type="number" id="f_montant" value="${d.montant||''}" oninput="calcTND()" placeholder="0.00"></div></div>
+    <div class="form-row"><div class="form-group"><label>Taux de change</label><input type="number" step="0.001" id="f_taux" value="${d.taux||''}" oninput="calcTND()" placeholder="3.350"></div><div class="form-group"><label>Montant TND (calculé auto)</label><input id="f_tnd" readonly placeholder="Automatique" style="background:#F8FAFC;color:#2563EB;font-weight:600"></div></div>
+    <div class="form-row"><div class="form-group"><label>Banque domiciliataire</label><select id="f_banque">${banquesOpts}</select></div><div class="form-group"><label>N° Dossier banque</label><input id="f_dossier" value="${d.dossier||''}" placeholder="BIA-2026-001"></div></div>
+    <div class="form-row"><div class="form-group"><label>Statut</label><select id="f_statut_d"><option>En cours</option><option>Soldé</option><option>Partiellement réglé</option></select></div></div>`;
+  }
+  if(type==='mensuel'){
+    setTimeout(()=>{selVal('f_banque',d.banque);selVal('f_mode',d.mode);selVal('f_devise_m',d.devise);if(d.mois){const sel=document.getElementById('f_mois');if(sel)sel.value=d.mois}},0);
+    return`
+    <div class="form-row"><div class="form-group"><label>Mois</label><select id="f_mois"><option>Janvier</option><option>Février</option><option>Mars</option><option>Avril</option><option>Mai</option><option>Juin</option><option>Juillet</option><option>Août</option><option>Septembre</option><option>Octobre</option><option>Novembre</option><option>Décembre</option></select></div><div class="form-group"><label>Banque</label><select id="f_banque">${banquesOpts}</select></div></div>
+    <div class="form-row"><div class="form-group"><label>Fournisseur</label><input id="f_fournisseur" value="${d.fournisseur||''}" placeholder="SOTUVER SARL"></div><div class="form-group"><label>Mode de règlement</label><select id="f_mode"><option>Virement</option><option>Traite</option><option>Chèque</option><option>Effet</option></select></div></div>
+    <div class="form-row"><div class="form-group"><label>N° Règlement</label><input id="f_num" value="${d.num||''}" placeholder="VIR-001"></div><div class="form-group"><label>Date de règlement</label><input type="date" id="f_date" value="${d.date||''}"></div></div>
+    <div class="form-row"><div class="form-group"><label>Devise</label><select id="f_devise_m"><option>TND</option><option>EUR</option><option>USD</option></select></div><div class="form-group"><label>Montant TND</label><input type="number" id="f_montantTND" value="${d.montantTND||''}" placeholder="0.000"></div></div>`;
+  }
+  if(type==='user'){
+    return`
+    <div class="form-row"><div class="form-group"><label>Nom complet</label><input id="f_nom" placeholder="Prénom Nom"></div><div class="form-group"><label>Email</label><input type="email" id="f_email" placeholder="email@fintrack.tn"></div></div>
+    <div class="form-row"><div class="form-group"><label>Profil</label><select id="f_profil"><option>Administrateur</option><option>Directeur Financier</option><option>Directeur Général</option></select></div><div class="form-group"><label>Mot de passe</label><input type="password" id="f_pass" placeholder="••••••••"></div></div>`;
+  }
+  return '';
+}
+
+function calcTND(){
+  const m=parseFloat(document.getElementById('f_montant')?.value)||0;
+  const t=parseFloat(document.getElementById('f_taux')?.value)||0;
+  const el=document.getElementById('f_tnd');
+  if(el)el.value=m&&t?fmt(m*t)+' TND':'';
+}
+
+// ============================================================
+// SAVE MODAL
+// ============================================================
+function saveModal(){
+  const type=editModule;
+  if(type==='impaye-client'||type==='impaye-fourn'){
+    const isClient=type==='impaye-client';
+    const ni={
+      id:editId||Date.now(),
+      ref:document.getElementById('f_ref').value||'REF-000',
+      mode:document.getElementById('f_mode').value,
+      num:document.getElementById('f_num').value||'N/A',
+      emission:document.getElementById('f_emission').value,
+      echeance:document.getElementById('f_echeance').value,
+      montant:parseFloat(document.getElementById('f_montant').value)||0,
+      banque:document.getElementById('f_banque').value,
+      statut:document.getElementById('f_statut').value,
+      commentaire:document.getElementById('f_commentaire').value
+    };
+    if(isClient){ni.client=document.getElementById('f_name').value||'Client';if(editId){data.impayesClients[data.impayesClients.findIndex(r=>r.id===editId)]=ni}else data.impayesClients.push(ni);renderImpayesClients();}
+    else{ni.fournisseur=document.getElementById('f_name').value||'Fournisseur';if(editId){data.impayesFourn[data.impayesFourn.findIndex(r=>r.id===editId)]=ni}else data.impayesFourn.push(ni);renderImpayesFourn();updateFournKPI();}
+  }
+  else if(type==='devise'){
+    const m=parseFloat(document.getElementById('f_montant').value)||0,t=parseFloat(document.getElementById('f_taux').value)||0;
+    const ni={id:editId||Date.now(),fournisseur:document.getElementById('f_fournisseur').value||'Fournisseur',date:document.getElementById('f_date').value,devise:document.getElementById('f_devise').value,montant:m,taux:t,banque:document.getElementById('f_banque').value,dossier:document.getElementById('f_dossier').value,statut:document.getElementById('f_statut_d').value};
+    if(editId){data.devises[data.devises.findIndex(r=>r.id===editId)]=ni}else data.devises.push(ni);
+    renderDevises();updateDevisesKPI();
+  }
+  else if(type==='mensuel'){
+    const ni={id:editId||Date.now(),mois:document.getElementById('f_mois').value,banque:document.getElementById('f_banque').value,fournisseur:document.getElementById('f_fournisseur').value||'Fournisseur',mode:document.getElementById('f_mode').value,num:document.getElementById('f_num').value,date:document.getElementById('f_date').value,devise:document.getElementById('f_devise_m').value,montantTND:parseFloat(document.getElementById('f_montantTND').value)||0};
+    if(editId){data.mensuels[data.mensuels.findIndex(r=>r.id===editId)]=ni}else data.mensuels.push(ni);
+    renderMensuels();
+    renderMonthlyCharts();
+  }
+  else if(type==='ligne'&&editId){
+    const b=data.lignes.find(r=>r.id===editId);
+    if(b){
+      b.produits.forEach((p,i)=>{
+        const a=parseFloat(document.getElementById('auth_'+i)?.value);
+        const u=parseFloat(document.getElementById('used_'+i)?.value);
+        if(!isNaN(a)&&a>=0)p.auth=a;
+        if(!isNaN(u)&&u>=0)p.used=Math.min(u,p.auth);
+      });
+      renderBankCards();
+    }
+  }
+  else if(type==='ligne-new'){
+    const name=(document.getElementById('new-bank-name')?.value||'Nouvelle Banque').trim();
+    const color=document.getElementById('new-bank-color')?.value||'#6366F1';
+    const initials=name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const prodNoms=['Découvert','Escompte','FED','Financement Stocks','Fin. Droits Douane'];
+    const produits=prodNoms.map((nom,i)=>({nom,auth:parseFloat(document.getElementById('new_auth_'+i)?.value)||500,used:parseFloat(document.getElementById('new_used_'+i)?.value)||0}));
+    data.lignes.push({id:Date.now(),banque:name,color,initials,produits});
+    renderBankCards();
+  }
+  closeModal();
+  saveData();
+  refreshAllBankDropdowns();
+  renderDashboard();
+  showNotif('Enregistrement sauvegardé ✓');
+}
+
+// ============================================================
+// DELETE
+// ============================================================
+function deleteRow(arr,id,type){
+  if(!confirm('Confirmer la suppression ?'))return;
+  data[arr]=data[arr].filter(r=>r.id!==id);
+  if(arr==='impayesClients')renderImpayesClients();
+  else if(arr==='impayesFourn'){renderImpayesFourn();updateFournKPI();}
+  else if(arr==='devises'){renderDevises();updateDevisesKPI();}
+  else if(arr==='mensuels'){renderMensuels();renderMonthlyCharts();}
+  saveData();
+  renderDashboard();
+  showNotif('Enregistrement supprimé');
+}
+
+// ============================================================
+// DELETE BANK
+// ============================================================
+function deleteBank(id,name){
+  if(!confirm(`Supprimer la banque "${name}" et toutes ses lignes ?\n\nCette action est irréversible.`))return;
+  data.lignes=data.lignes.filter(b=>b.id!==id);
+  renderBankCards();
+  saveData();
+  refreshAllBankDropdowns();
+  renderDashboard();
+  renderMonthlyCharts();
+  showNotif(`Banque "${name}" supprimée ✓`);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function renderAll(){
+  refreshAllBankDropdowns();
+  renderDashboard();
+  renderImpayesClients();
+  renderImpayesFourn();updateFournKPI();
+  renderDevises();updateDevisesKPI();
+  renderMensuels();renderMonthlyCharts();
+  renderBankCards();
+}
+
+// Données chargées après connexion (voir doLogin)
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+</script>
+</body>
+</html>
